@@ -3,30 +3,28 @@ import java.util.*;
 public class WeekAssignment {
 
     // ================= LINEAR SEARCH =================
-    public static void linearSearch(String[] arr, String target) {
-        int first = -1, last = -1;
+    public static void linearSearch(int[] arr, int target) {
         int comparisons = 0;
+        boolean found = false;
 
         for (int i = 0; i < arr.length; i++) {
             comparisons++;
-            if (arr[i].equals(target)) {
-                if (first == -1) first = i;
-                last = i;
+            if (arr[i] == target) {
+                found = true;
+                System.out.println("Linear: Found at index " + i);
+                break;
             }
         }
 
-        System.out.println("Linear Search:");
-        if (first != -1) {
-            System.out.println("First occurrence at index: " + first);
-            System.out.println("Last occurrence at index: " + last);
-        } else {
-            System.out.println("Account not found");
+        if (!found) {
+            System.out.println("Linear: Threshold not found");
         }
+
         System.out.println("Comparisons: " + comparisons);
     }
 
-    // ================= BINARY SEARCH (FIND ONE) =================
-    public static int binarySearch(String[] arr, String target) {
+    // ================= BINARY SEARCH INSERTION POINT =================
+    public static int binaryInsertionPoint(int[] arr, int target) {
         int low = 0, high = arr.length - 1;
         int comparisons = 0;
 
@@ -34,53 +32,63 @@ public class WeekAssignment {
             comparisons++;
             int mid = (low + high) / 2;
 
-            int cmp = arr[mid].compareTo(target);
-
-            if (cmp == 0) {
-                System.out.println("Binary Search Comparisons: " + comparisons);
+            if (arr[mid] == target) {
+                System.out.println("Binary: Found exact match at index " + mid);
+                System.out.println("Comparisons: " + comparisons);
                 return mid;
-            } else if (cmp < 0) {
+            } else if (arr[mid] < target) {
                 low = mid + 1;
             } else {
                 high = mid - 1;
             }
         }
 
-        System.out.println("Binary Search Comparisons: " + comparisons);
-        return -1;
+        System.out.println("Binary: Insertion point = " + low);
+        System.out.println("Comparisons: " + comparisons);
+        return low;
     }
 
-    // ================= COUNT OCCURRENCES =================
-    public static int countOccurrences(String[] arr, String target) {
-        int count = 0;
-        for (String s : arr) {
-            if (s.equals(target)) count++;
+    // ================= FLOOR & CEILING =================
+    public static void findFloorCeiling(int[] arr, int target) {
+        int low = 0, high = arr.length - 1;
+        int floor = -1, ceiling = -1;
+        int comparisons = 0;
+
+        while (low <= high) {
+            comparisons++;
+            int mid = (low + high) / 2;
+
+            if (arr[mid] == target) {
+                floor = ceiling = arr[mid];
+                break;
+            } else if (arr[mid] < target) {
+                floor = arr[mid]; // candidate
+                low = mid + 1;
+            } else {
+                ceiling = arr[mid]; // candidate
+                high = mid - 1;
+            }
         }
-        return count;
+
+        System.out.println("Binary Floor: " + floor);
+        System.out.println("Binary Ceiling: " + ceiling);
+        System.out.println("Comparisons: " + comparisons);
     }
 
     // ================= MAIN =================
     public static void main(String[] args) {
 
-        String[] logs = {"accB", "accA", "accB", "accC"};
+        int[] risks = {10, 25, 50, 100};
 
-        // Linear Search (unsorted)
-        linearSearch(logs, "accB");
+        int target = 30;
 
-        // Sort for Binary Search
-        Arrays.sort(logs);
-        System.out.println("\nSorted Logs: " + Arrays.toString(logs));
+        // Linear Search (unsorted scenario)
+        linearSearch(risks, target);
 
-        // Binary Search
-        int index = binarySearch(logs, "accB");
+        // Binary Search (sorted required)
+        int index = binaryInsertionPoint(risks, target);
 
-        if (index != -1) {
-            System.out.println("Binary Search Found at index: " + index);
-
-            int count = countOccurrences(logs, "accB");
-            System.out.println("Total occurrences: " + count);
-        } else {
-            System.out.println("Account not found");
-        }
+        // Floor & Ceiling
+        findFloorCeiling(risks, target);
     }
 }
