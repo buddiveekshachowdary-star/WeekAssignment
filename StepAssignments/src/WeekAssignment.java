@@ -1,24 +1,26 @@
 import java.util.*;
 
-class Trade {
-    String id;
-    int volume;
+class Asset {
+    String name;
+    double returnRate;
+    double volatility;
 
-    public Trade(String id, int volume) {
-        this.id = id;
-        this.volume = volume;
+    public Asset(String name, double returnRate, double volatility) {
+        this.name = name;
+        this.returnRate = returnRate;
+        this.volatility = volatility;
     }
 
     @Override
     public String toString() {
-        return id + ":" + volume;
+        return name + ":" + returnRate + "%";
     }
 }
 
 public class WeekAssignment {
 
-    // ================= MERGE SORT (ASCENDING - STABLE) =================
-    public static void mergeSort(Trade[] arr, int left, int right) {
+    // ================= MERGE SORT (ASCENDING, STABLE) =================
+    public static void mergeSort(Asset[] arr, int left, int right) {
         if (left < right) {
             int mid = (left + right) / 2;
 
@@ -29,12 +31,12 @@ public class WeekAssignment {
         }
     }
 
-    private static void merge(Trade[] arr, int left, int mid, int right) {
+    private static void merge(Asset[] arr, int left, int mid, int right) {
         int n1 = mid - left + 1;
         int n2 = right - mid;
 
-        Trade[] L = new Trade[n1];
-        Trade[] R = new Trade[n2];
+        Asset[] L = new Asset[n1];
+        Asset[] R = new Asset[n2];
 
         for (int i = 0; i < n1; i++)
             L[i] = arr[left + i];
@@ -44,7 +46,8 @@ public class WeekAssignment {
         int i = 0, j = 0, k = left;
 
         while (i < n1 && j < n2) {
-            if (L[i].volume <= R[j].volume) { // stable
+            // Stable: <= preserves order
+            if (L[i].returnRate <= R[j].returnRate) {
                 arr[k++] = L[i++];
             } else {
                 arr[k++] = R[j++];
@@ -58,9 +61,12 @@ public class WeekAssignment {
             arr[k++] = R[j++];
     }
 
-    // ================= QUICK SORT (DESCENDING) =================
-    public static void quickSort(Trade[] arr, int low, int high) {
+    // ================= QUICK SORT (DESC returnRate, ASC volatility) =================
+    public static void quickSort(Asset[] arr, int low, int high) {
         if (low < high) {
+            int pivotIndex = randomPivot(low, high); // random pivot
+            swap(arr, pivotIndex, high);
+
             int pi = partition(arr, low, high);
 
             quickSort(arr, low, pi - 1);
@@ -68,12 +74,12 @@ public class WeekAssignment {
         }
     }
 
-    private static int partition(Trade[] arr, int low, int high) {
-        int pivot = arr[high].volume; // Lomuto pivot
+    private static int partition(Asset[] arr, int low, int high) {
+        Asset pivot = arr[high];
         int i = low - 1;
 
         for (int j = low; j < high; j++) {
-            if (arr[j].volume > pivot) { // DESC
+            if (compare(arr[j], pivot) < 0) {
                 i++;
                 swap(arr, i, j);
             }
@@ -83,76 +89,41 @@ public class WeekAssignment {
         return i + 1;
     }
 
-    private static void swap(Trade[] arr, int i, int j) {
-        Trade temp = arr[i];
+    // Comparator:
+    // DESC returnRate, ASC volatility
+    private static int compare(Asset a1, Asset a2) {
+        if (a1.returnRate != a2.returnRate) {
+            return Double.compare(a2.returnRate, a1.returnRate); // DESC
+        }
+        return Double.compare(a1.volatility, a2.volatility); // ASC
+    }
+
+    private static void swap(Asset[] arr, int i, int j) {
+        Asset temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
 
-    // ================= MERGE TWO SORTED ARRAYS =================
-    public static Trade[] mergeSortedLists(Trade[] a, Trade[] b) {
-        Trade[] result = new Trade[a.length + b.length];
-
-        int i = 0, j = 0, k = 0;
-
-        while (i < a.length && j < b.length) {
-            if (a[i].volume <= b[j].volume) {
-                result[k++] = a[i++];
-            } else {
-                result[k++] = b[j++];
-            }
-        }
-
-        while (i < a.length)
-            result[k++] = a[i++];
-
-        while (j < b.length)
-            result[k++] = b[j++];
-
-        return result;
-    }
-
-    // ================= TOTAL VOLUME =================
-    public static int totalVolume(Trade[] arr) {
-        int sum = 0;
-        for (Trade t : arr) {
-            sum += t.volume;
-        }
-        return sum;
+    // Random Pivot
+    private static int randomPivot(int low, int high) {
+        return low + (int)(Math.random() * (high - low + 1));
     }
 
     // ================= MAIN =================
     public static void main(String[] args) {
 
-        Trade[] trades = {
-                new Trade("trade3", 500),
-                new Trade("trade1", 100),
-                new Trade("trade2", 300)
+        Asset[] assets = {
+                new Asset("AAPL", 12, 5),
+                new Asset("TSLA", 8, 7),
+                new Asset("GOOG", 15, 4)
         };
 
         // Merge Sort (Ascending)
-        mergeSort(trades, 0, trades.length - 1);
-        System.out.println("Merge Sort (Ascending): " + Arrays.toString(trades));
+        mergeSort(assets, 0, assets.length - 1);
+        System.out.println("Merge Sort (Ascending): " + Arrays.toString(assets));
 
-        // Quick Sort (Descending)
-        quickSort(trades, 0, trades.length - 1);
-        System.out.println("Quick Sort (Descending): " + Arrays.toString(trades));
-
-        // Example: Merge two sorted lists (morning & afternoon)
-        Trade[] morning = {
-                new Trade("trade1", 100),
-                new Trade("trade2", 300)
-        };
-
-        Trade[] afternoon = {
-                new Trade("trade3", 500)
-        };
-
-        Trade[] merged = mergeSortedLists(morning, afternoon);
-        System.out.println("Merged Trades: " + Arrays.toString(merged));
-
-        // Total volume
-        int total = totalVolume(merged);
-        System.out.println("Total Volume: " + total);
+        // Quick Sort (Descending + Volatility)
+        quickSort(assets, 0, assets.length - 1);
+        System.out.println("Quick Sort (Desc + Volatility): " + Arrays.toString(assets));
     }
 }
